@@ -39,3 +39,25 @@ const List<String> monthNames = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
+const List<String> ethiopianMonthNames = [
+  '',
+  'መስከረም', 'ጥቅምት', 'ኅዳር', 'ታህሳስ',
+  'ጥር', 'የካቲት', 'መጋቢት', 'ሚያዚያ',
+  'ግንቦት', 'ሰኔ', 'ሀምሌ', 'ነሐሴ', 'ጳጉሜን'
+];
+
+const List<String> hijriMonthNames = [
+  '', // Index 0 not used
+  'مُحَرَّم',
+  'صَفَر',
+  'رَبِيع ٱلْأَوَّل',
+  'رَبِيع ٱلثَّانِي',
+  'جُمَادَى ٱلْأُولَى',
+  'جُمَادَى ٱلثَّانِيَة',
+  'رَجَب',
+  'شَعْبَان',
+  'رَمَضَان',
+  'شَوَّال',
+  'ذُو ٱلْقَعْدَة',
+  'ذُو ٱلْحِجَّة',
+];

@@ -1,6 +1,9 @@
 name: calendar_picker
-description: A custom dialog-based Gregorian calendar date picker widget for Flutter.
-version: 1.0.0
+description: A lightweight, customizable date picker package for Flutter that supports              
+  - 🗓️ **Gregorian Calendar**
+  - 🌙 **Hijri  Calendar**
+  - 🗿 **Ethiopian Calendar**
+version: 2.0.0
 homepage: https://github.com/HalidAwell/calendar_picker
 repository: https://github.com/HalidAwell/calendar_picker
 issue_tracker: https://github.com/HalidAwell/calendar_picker/issues
@@ -11,6 +14,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  ethiopian_datetime: ^1.0.3
+  hijri: ^3.0.0
 
 dev_dependencies:
   flutter_test:

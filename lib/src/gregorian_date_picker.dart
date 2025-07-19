@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'calendar_table.dart';
 
 
-Future<DateTime?> showCustomDatePicker({
+Future<DateTime?> GregorianDatePicker({
   required BuildContext context,
+  required int initialYear,
   required int firstYear,
   required int lastYear,
 }) async {
-  DateTime tempSelected = DateTime.now();
+  // Here is intialYear needed
+  DateTime tempSelected = DateTime(initialYear, 1, 1);
 
   final dialogWidth = 250.0;
 

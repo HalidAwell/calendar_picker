@@ -1,25 +1,34 @@
 import 'package:flutter/material.dart';
+import 'date_converter.dart'; // your Hijri class
 import 'month_utils.dart';
 
-class CalendarTableGregorian extends StatelessWidget {
-  final DateTime selectedDate;
-  final Function(DateTime) onDateSelected;
+class CalendarTableHijri extends StatelessWidget {
+  final Hijri selectedDate;
+  final Function(Hijri) onDateSelected;
   final int firstYear;
   final int lastYear;
-  const CalendarTableGregorian({
+
+  const CalendarTableHijri({
     super.key,
     required this.selectedDate,
+    required this.onDateSelected,
     required this.firstYear,
     required this.lastYear,
-    required this.onDateSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    final firstDayOfMonth = DateTime(selectedDate.year, selectedDate.month, 1);
-    final firstWeekday = firstDayOfMonth.weekday % 7;
-    final daysInMonth = DateTime(selectedDate.year, selectedDate.month + 1, 0).day;
-    final today = DateTime.now();
+    // 1. Get 1st of Hijri month → Gregorian
+    final tempGregorian = Hijri(
+        year: selectedDate.year,
+        month: selectedDate.month,
+        day: 1).toGreg();
+
+    final hijriStart = Hijri.fromDate(tempGregorian);
+    final daysInMonth = hijriStart.monthLength();
+    final firstWeekday = tempGregorian.weekday % 7;
+
+    final todayHijri = Hijri.fromGregorian(DateTime.now());
 
     List<Widget> dayCells = [];
 
@@ -28,17 +37,27 @@ class CalendarTableGregorian extends StatelessWidget {
     }
 
     for (int day = 1; day <= daysInMonth; day++) {
-      final dayDate = DateTime(selectedDate.year, selectedDate.month, day);
-      final isToday = _isSameDate(dayDate, today);
-      final isSelected = _isSameDate(dayDate, selectedDate);
-      final isWeekend = dayDate.weekday == DateTime.saturday || dayDate.weekday == DateTime.sunday;
+      final isToday = day == todayHijri.day &&
+          selectedDate.month == todayHijri.month &&
+          selectedDate.year == todayHijri.year;
 
-      final isDisabled = dayDate.year < firstYear || dayDate.year > lastYear;
+      final isSelected = day == selectedDate.day;
+
+      final hijriDate = Hijri(
+        year: selectedDate.year,
+        month: selectedDate.month,
+        day: day,
+      );
+
+      final isDisabled = selectedDate.year < firstYear || selectedDate.year > lastYear;
 
       dayCells.add(
         GestureDetector(
-          //onTap: () => onDateSelected(dayDate),
-          onTap: isDisabled ? null : () => onDateSelected(dayDate),
+          onTap: isDisabled
+              ? null
+              : () => onDateSelected(
+            Hijri(year: selectedDate.year, month: selectedDate.month, day: day),
+          ),
           child: Container(
             margin: const EdgeInsets.all(3),
             decoration: BoxDecoration(
@@ -46,7 +65,7 @@ class CalendarTableGregorian extends StatelessWidget {
                   ? Colors.teal
                   : isSelected
                   ? Colors.teal.shade100
-                  : isWeekend
+                  : hijriDate.isWeekend()
                   ? Colors.orange[100]
                   : null,
               borderRadius: BorderRadius.circular(6),
@@ -77,13 +96,12 @@ class CalendarTableGregorian extends StatelessWidget {
     }
 
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        _buildTodayHeader(today),
+        _buildTodayHeader(todayHijri),
         const SizedBox(height: 12),
         _buildMonthNavigation(),
         const SizedBox(height: 12),
-        _buildWeekdayRow(['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']),
+        _buildWeekdayRow(['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت']),
         Table(
           border: TableBorder.all(color: Colors.grey.shade300, width: 0.5),
           children: List.generate(6, (week) {
@@ -99,7 +117,7 @@ class CalendarTableGregorian extends StatelessWidget {
     );
   }
 
-  Widget _buildTodayHeader(DateTime today) {
+  Widget _buildTodayHeader(Hijri today) {
     return Container(
         width: double.infinity,
         padding: const EdgeInsets.only(left:10, top:2, right: 10, bottom: 12),
@@ -107,46 +125,35 @@ class CalendarTableGregorian extends StatelessWidget {
           color: Colors.teal[500],
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("Gregorian Date Calender Picker", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, fontStyle: FontStyle.italic)),
-              ],
-            ),
-            const SizedBox(height: 10),
-            GestureDetector(
-              onTap: () {
-                if (selectedDate.month != today.month || selectedDate.year != today.year) {
-                  onDateSelected(DateTime(today.year, today.month, today.day));
-                }
-              },
-              child: Row(
-                children: [
-                  const Icon(Icons.today, size: 18, color: Colors.white),
-                  const SizedBox(width: 6),
-                  const Text("Today:", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
-                  const SizedBox(width: 6),
-                  Text(
-                    _formatFullDate(today),
-                    style: const TextStyle(fontSize: 13, color: Colors.white),
-                  ),
-                ],
+        child:Column(children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text("منتقي تاريخ التقويم الهجري", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white, fontStyle: FontStyle.italic)),
+            ],
+          ),
+          const SizedBox(height: 10),
+      GestureDetector(
+        onTap: () {
+          if (selectedDate.month != today.month || selectedDate.year != today.year) {
+            onDateSelected(today);
+          }
+        },
+        child: Row(
+            children: [
+              const Icon(Icons.today, size: 18, color: Colors.white),
+              const SizedBox(width: 6),
+              const Text("اليوم:", style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white)),
+              const SizedBox(width: 6),
+              Text(
+                today.toString(),
+                style: const TextStyle(fontSize: 15, color: Colors.white),
               ),
-            ),
-          ],
-        ),
-
-      );
+            ],
+          ),),
+        ],),
+    );
   }
-
-  String _formatFullDate(DateTime date) {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    return '${days[date.weekday % 7]}, ${monthNames[date.month]} ${date.day}, ${date.year}';
-  }
-
-  bool _isSameDate(DateTime a, DateTime b) => a.year == b.year && a.month == b.month && a.day == b.day;
 
   Widget _buildWeekdayRow(List<String> labels) {
     return Row(
@@ -174,6 +181,7 @@ class CalendarTableGregorian extends StatelessWidget {
   }
 
   Widget _buildMonthNavigation() {
+
     List<int> yearRange = List.generate(
       lastYear - firstYear + 1,
           (index) => firstYear + index,
@@ -185,7 +193,7 @@ class CalendarTableGregorian extends StatelessWidget {
         _arrowBtn(Icons.keyboard_double_arrow_left, () => _changeYear(-1)),
         _arrowBtn(Icons.chevron_left, () => _changeMonth(-1)),
         const SizedBox(width: 4),
-    Text('${monthNames[selectedDate.month]}', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+        Text(hijriMonthNames[selectedDate.month], style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
         const SizedBox(width: 6),
         SizedBox(
           width: 70,
@@ -196,7 +204,7 @@ class CalendarTableGregorian extends StatelessWidget {
             items: yearRange,
             onChanged: (year) {
               if (year != null) {
-                onDateSelected(DateTime(year, selectedDate.month, 1));
+                onDateSelected(Hijri(year: year, month: selectedDate.month, day:1));
               }
             },
           ),
@@ -209,18 +217,28 @@ class CalendarTableGregorian extends StatelessWidget {
   }
 
   void _changeMonth(int offset) {
-    final newDate = DateTime(selectedDate.year, selectedDate.month + offset, 1);
-    if (newDate.year < firstYear || newDate.year > lastYear) return;
-    onDateSelected(newDate);
-  }
+    int newMonth = selectedDate.month + offset;
+    int newYear = selectedDate.year;
 
+    if (newMonth > 12) {
+      newMonth = 1;
+      newYear += 1;
+    } else if (newMonth < 1) {
+      newMonth = 12;
+      newYear -= 1;
+    }
+
+    if (newYear < firstYear || newYear > lastYear) return;
+
+    onDateSelected(Hijri(year: newYear, month: newMonth, day: 1));
+  }
 
   void _changeYear(int offset) {
-    final newDate = DateTime(selectedDate.year + offset, selectedDate.month, selectedDate.day);
-    if (newDate.year < firstYear || newDate.year > lastYear) return;
-    onDateSelected(newDate);
-  }
+    int newYear = selectedDate.year + offset;
+    if (newYear < firstYear || newYear > lastYear) return;
 
+    onDateSelected(Hijri(year: newYear, month: selectedDate.month, day: 1));
+  }
 
   Widget _arrowBtn(IconData icon, VoidCallback onPressed) {
     return IconButton(

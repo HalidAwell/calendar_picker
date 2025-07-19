@@ -20,37 +20,109 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  DateTime? selectedDate;
+  /// These variables are used to store the returened
+  /// value from date pickers for further use
+
+  dynamic selectedGDate;
+  dynamic selectedHDate;
+  dynamic selectedEDate;
+
+  CalendarType selectedCalendarType = CalendarType.gregorian;
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Calendar Picker Example")),
-      body: Center(
+      appBar: AppBar(title: const Text('Unified Date Picker')),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
-              child: const Text("Pick Date"),
-              onPressed: () async {
-                final result = await showCustomDatePicker(
-                  context: context,
-                  //Those firstYear and lastYear parameters set the range of year to be seen in the datepicker
-                  firstYear: 2000,// Here Choose intial year to be apear in the dropdown
-                  lastYear: 2030, // Here Choose last year to be apear in the dropdown
-                );
-
-                if (result != null) {
-                  setState(() => selectedDate = result);
-                }
-              },
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    /// As you see here  to use calender pickers from unified
+                    /// model call showUnifiedDatePicker by identifing the calender type
+                    /// initialYear can be simple (int) year like 2025, forexample, or
+                    /// as i use you can assign today's year as shown below.
+                    final result = await showUnifiedDatePicker(
+                      context: context,
+                      calendarType: CalendarType.gregorian,
+                      initialYear: DateTime.now().year,
+                      firstYear: 1900,
+                      lastYear: 2100,
+                    );
+                    if (result != null) {
+                      setState(() {
+                        selectedGDate = result;
+                      });
+                    }
+                  },
+                  child: const Text('Pick Gregorian'),
+                ),
+                // this is example for Hijri year.
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await showUnifiedDatePicker(
+                      context: context,
+                      calendarType: CalendarType.hijri,
+                      initialYear: Hijri.now().year,
+                      firstYear: 1358,
+                      lastYear: 1500,
+                    );
+                    if (result != null) {
+                      setState(() {
+                        selectedHDate = result;
+                      });
+                    }
+                  },
+                  child: const Text('Pick Hijri'),
+                ),
+                /// this is for ethiopian calender picker example.
+                ElevatedButton(
+                  onPressed: () async {
+                    final result = await showUnifiedDatePicker(
+                      context: context,
+                      calendarType: CalendarType.ethiopian,
+                      initialYear: Ethiopian.now().year,
+                      firstYear: 1900,
+                      lastYear: 2100,
+                    );
+                    if (result != null) {
+                      setState(() {
+                        selectedEDate = result;
+                      });
+                    }
+                  },
+                  child: const Text('Pick Ethiopian'),
+                ),
+              ],
             ),
             const SizedBox(height: 20),
-            if (selectedDate != null)
-              Text("Selected: ${selectedDate!.year}-${selectedDate!.month}-${selectedDate!.day}")
+            if (selectedGDate != null)
+              Text(
+                "Selected: ${selectedGDate}",
+                style: const TextStyle(fontSize: 16),
+              ),
+            const SizedBox(height: 5),
+            if (selectedHDate != null)
+              Text(
+                "Selected: ${selectedHDate.toString()}",
+                style: const TextStyle(fontSize: 16),
+              ),
+            const SizedBox(height: 5),
+            if (selectedEDate != null)
+              Text(
+                "Selected: ${selectedEDate.toString()}",
+                style: const TextStyle(fontSize: 16),
+              ),
           ],
         ),
       ),
     );
   }
+
 }
